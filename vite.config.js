@@ -36,7 +36,14 @@ export default defineConfig({
     },
   },
   plugins: [
-    nitro({ preset: "render-com" }), // 🔑 Add Nitro with Render preset
+        nitro({
+      preset: "render-com",
+      // 🔑 Tell the production frontend server to proxy API requests to the Express backend
+      routeRules: {
+        '/api/**': { proxy: 'http://127.0.0.1:3001/api/**' },
+        '/uploads/**': { proxy: 'http://127.0.0.1:3001/uploads/**' },
+      }
+    }),
     tanstackStart({ srcDirectory: "src" }),
     react(),
   ],
