@@ -3,9 +3,12 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-export const DB_PATH = resolve(__dirname, "..", "data", "kano.db");
-export const UPLOAD_DIR = resolve(__dirname, "..", "data", "uploads");
+// Replace your current DB_PATH and UPLOAD_DIR definitions with:
+const isProduction = process.env.NODE_ENV === "production";
+const rootDir = isProduction ? "/var/data" : resolve(__dirname, "..", "data");
+
+export const DB_PATH = resolve(rootDir, "kano.db");
+export const UPLOAD_DIR = resolve(rootDir, "uploads");
 
 mkdirSync(dirname(DB_PATH), { recursive: true });
 mkdirSync(UPLOAD_DIR, { recursive: true });
