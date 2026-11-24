@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from "node:url";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { nitro } from "nitro/vite"; // 1. Add this import
 
 const NOT_PREBUNDLED = new Set([
   "react", "react-dom",
@@ -36,6 +37,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    nitro({ preset: "render-com" }),
     tanstackStart({ srcDirectory: "src" }),
     react(),
   ],
