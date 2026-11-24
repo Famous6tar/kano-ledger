@@ -3,7 +3,7 @@ import { fileURLToPath, URL } from "node:url";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { nitro } from "nitro/vite"; // 1. Add this import
+import { nitro } from "nitro/vite"; // Import Nitro
 
 const NOT_PREBUNDLED = new Set([
   "react", "react-dom",
@@ -22,7 +22,6 @@ const BROWSER_PREBUNDLE = [
 ];
 
 export default defineConfig({
-  // 🔑 The fix — restore the `@/` alias that the Base44 plugin used to provide.
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -37,7 +36,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    nitro({ preset: "render-com" }),
+    nitro({ preset: "render-com" }), // 🔑 Add Nitro with Render preset
     tanstackStart({ srcDirectory: "src" }),
     react(),
   ],
