@@ -1,48 +1,95 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeftRight, LayoutDashboard, Settings2, Users } from "lucide-react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { LayoutDashboard, Users, ReceiptText, Settings, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { useBrand } from "@/components/brand/BrandProvider";
+import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+const NAV_ITEMS = [
   { to: "/", label: "Overview", icon: LayoutDashboard },
   { to: "/customers", label: "Retailers", icon: Users },
-  { to: "/transactions", label: "Transactions", icon: ArrowLeftRight },
-  { to: "/settings", label: "Business profile", icon: Settings2 },
+  { to: "/transactions", label: "Transactions", icon: ReceiptText },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function SidebarNav({ onNavigate }) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+export function SidebarNav() {
+  const { user, logout } = useAuth();
+  const { brand } = useBrand();
+  const location = useLocation();
 
   return (
-    <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
-      <p className="px-3 pb-2 pt-3 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-muted-foreground/70">
-        Workspace
-      </p>
-      {NAV.map((item) => {
-        const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.to}
-            to={item.to}
-            onClick={onNavigate}
-            className={cn(
-              "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
-              active
-                ? "bg-brand/10 font-semibold text-foreground"
-                : "font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-            )}
-          >
-            <span
-              className={cn(
-                "absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-brand transition-opacity",
-                active ? "opacity-100" : "opacity-0"
-              )}
+    <div className="flex h-full flex-col justify-between p-4">
+      {/* Top Section: Brand & Navigation */}
+      <div>
+        <div className="mb-8 flex items-center gap-3 px-2">
+          {brand?.logo_url ? (
+            <img
+              src={brand.logo_url}
+              alt="Logo"
+              className="h-10 w-10 rounded-xl object-cover ring-1 ring-black/10"
             />
-            <Icon className={cn("h-[1.05rem] w-[1.05rem]", active ? "text-brand" : "text-muted-foreground")} />
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
+          ) : (
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand text-brand-foreground font-heading font-bold">
+              {initials(brand?.business_name || "Kanti")}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate font-heading text-sm font-bold text-foreground">
+              {brand?.business_name || "Kanti"}
+            </p>
+            <p className="truncate text-[0.65rem] text-muted-foreground">
+              {brand?.tagline || "Shop Ledger"}
+            </p>
+          </div>
+        </div>
+
+        <nav className="space-y-1">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              location.pathname === item.to ||
+              (item.to !== "/" && location.pathname.startsWith(item.to));
+
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-brand/10 text-brand"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Bottom Section: User Profile & Logout */}
+      <div className="mt-auto border-t border-border/60 pt-4">
+        <div className="mb-3 flex items-center gap-3 px-2">
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+            {initials(user?.email || "U")}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium text-foreground">
+              {user?.full_name || user?.email || "Signed in"}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => logout()}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+        >
+          <LogOut className="h-4 w-4" />
+          Log out
+        </button>
+      </div>
+    </div>
   );
 }
