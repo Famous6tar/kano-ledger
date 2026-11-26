@@ -142,7 +142,7 @@ export function InvoiceDialog({ open, onOpenChange, customers = [], onSaved }) {
             
             {items.map((item, index) => (
               <div key={index} className="grid grid-cols-12 gap-2 mb-2 items-center">
-                <div className="col-span-6"><Input placeholder="e.g. 5 Cartons of Milk" value={item.name} onChange={e => updateItem(index, "name", e.target.value)} /></div>
+                <div className="col-span-6"><Input placeholder="e.g. Apple Pants" value={item.name} onChange={e => updateItem(index, "name", e.target.value)} /></div>
                 <div className="col-span-2"><Input type="number" min="1" value={item.qty} onChange={e => updateItem(index, "qty", e.target.value)} /></div>
                 <div className="col-span-3"><Input type="number" min="1" value={item.price} onChange={e => updateItem(index, "price", e.target.value)} /></div>
                 <div className="col-span-1 flex justify-end">
