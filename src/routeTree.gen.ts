@@ -18,9 +18,13 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthedAppRouteImport } from './routes/_authed/_app'
 import { Route as AuthedSetupRouteImport } from './routes/_authed/setup'
 import { Route as AuthedAppIndexRouteImport } from './routes/_authed/_app/index'
+import { Route as AuthedAppPosRouteImport } from './routes/_authed/_app/pos'
 import { Route as AuthedAppSettingsRouteImport } from './routes/_authed/_app/settings'
 import { Route as AuthedAppCustomersIndexRouteImport } from './routes/_authed/_app/customers.index'
 import { Route as AuthedAppCustomersCustomerIdRouteImport } from './routes/_authed/_app/customers.$customerId'
+import { Route as AuthedAppExpensesIndexRouteImport } from './routes/_authed/_app/expenses.index'
+import { Route as AuthedAppProductsIndexRouteImport } from './routes/_authed/_app/products.index'
+import { Route as AuthedAppSalesIndexRouteImport } from './routes/_authed/_app/sales.index'
 import { Route as AuthedAppTransactionsIndexRouteImport } from './routes/_authed/_app/transactions.index'
 
 const AuthedRoute = AuthedRouteImport.update({
@@ -66,6 +70,11 @@ const AuthedAppIndexRoute = AuthedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthedAppRoute,
 } as any)
+const AuthedAppPosRoute = AuthedAppPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => AuthedAppRoute,
+} as any)
 const AuthedAppSettingsRoute = AuthedAppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -82,6 +91,21 @@ const AuthedAppCustomersCustomerIdRoute =
     path: '/customers/$customerId',
     getParentRoute: () => AuthedAppRoute,
   } as any)
+const AuthedAppExpensesIndexRoute = AuthedAppExpensesIndexRouteImport.update({
+  id: '/expenses/',
+  path: '/expenses/',
+  getParentRoute: () => AuthedAppRoute,
+} as any)
+const AuthedAppProductsIndexRoute = AuthedAppProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => AuthedAppRoute,
+} as any)
+const AuthedAppSalesIndexRoute = AuthedAppSalesIndexRouteImport.update({
+  id: '/sales/',
+  path: '/sales/',
+  getParentRoute: () => AuthedAppRoute,
+} as any)
 const AuthedAppTransactionsIndexRoute =
   AuthedAppTransactionsIndexRouteImport.update({
     id: '/transactions/',
@@ -97,9 +121,13 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/setup': typeof AuthedSetupRoute
+  '/pos': typeof AuthedAppPosRoute
   '/settings': typeof AuthedAppSettingsRoute
   '/customers/$customerId': typeof AuthedAppCustomersCustomerIdRoute
   '/customers/': typeof AuthedAppCustomersIndexRoute
+  '/expenses/': typeof AuthedAppExpensesIndexRoute
+  '/products/': typeof AuthedAppProductsIndexRoute
+  '/sales/': typeof AuthedAppSalesIndexRoute
   '/transactions/': typeof AuthedAppTransactionsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -110,9 +138,13 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/setup': typeof AuthedSetupRoute
+  '/pos': typeof AuthedAppPosRoute
   '/settings': typeof AuthedAppSettingsRoute
   '/customers/$customerId': typeof AuthedAppCustomersCustomerIdRoute
   '/customers': typeof AuthedAppCustomersIndexRoute
+  '/expenses': typeof AuthedAppExpensesIndexRoute
+  '/products': typeof AuthedAppProductsIndexRoute
+  '/sales': typeof AuthedAppSalesIndexRoute
   '/transactions': typeof AuthedAppTransactionsIndexRoute
 }
 export interface FileRoutesById {
@@ -125,10 +157,14 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authed/_app': typeof AuthedAppRouteWithChildren
   '/_authed/setup': typeof AuthedSetupRoute
+  '/_authed/_app/pos': typeof AuthedAppPosRoute
   '/_authed/_app/settings': typeof AuthedAppSettingsRoute
   '/_authed/_app/': typeof AuthedAppIndexRoute
   '/_authed/_app/customers/$customerId': typeof AuthedAppCustomersCustomerIdRoute
   '/_authed/_app/customers/': typeof AuthedAppCustomersIndexRoute
+  '/_authed/_app/expenses/': typeof AuthedAppExpensesIndexRoute
+  '/_authed/_app/products/': typeof AuthedAppProductsIndexRoute
+  '/_authed/_app/sales/': typeof AuthedAppSalesIndexRoute
   '/_authed/_app/transactions/': typeof AuthedAppTransactionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -141,9 +177,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/setup'
+    | '/pos'
     | '/settings'
     | '/customers/$customerId'
     | '/customers/'
+    | '/expenses/'
+    | '/products/'
+    | '/sales/'
     | '/transactions/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,9 +194,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/setup'
+    | '/pos'
     | '/settings'
     | '/customers/$customerId'
     | '/customers'
+    | '/expenses'
+    | '/products'
+    | '/sales'
     | '/transactions'
   id:
     | '__root__'
@@ -168,10 +212,14 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authed/_app'
     | '/_authed/setup'
+    | '/_authed/_app/pos'
     | '/_authed/_app/settings'
     | '/_authed/_app/'
     | '/_authed/_app/customers/$customerId'
     | '/_authed/_app/customers/'
+    | '/_authed/_app/expenses/'
+    | '/_authed/_app/products/'
+    | '/_authed/_app/sales/'
     | '/_authed/_app/transactions/'
   fileRoutesById: FileRoutesById
 }
@@ -249,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAppIndexRouteImport
       parentRoute: typeof AuthedAppRoute
     }
+    '/_authed/_app/pos': {
+      id: '/_authed/_app/pos'
+      path: '/pos'
+      fullPath: '/pos'
+      preLoaderRoute: typeof AuthedAppPosRouteImport
+      parentRoute: typeof AuthedAppRoute
+    }
     '/_authed/_app/settings': {
       id: '/_authed/_app/settings'
       path: '/settings'
@@ -270,6 +325,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAppCustomersCustomerIdRouteImport
       parentRoute: typeof AuthedAppRoute
     }
+    '/_authed/_app/expenses/': {
+      id: '/_authed/_app/expenses/'
+      path: '/expenses'
+      fullPath: '/expenses/'
+      preLoaderRoute: typeof AuthedAppExpensesIndexRouteImport
+      parentRoute: typeof AuthedAppRoute
+    }
+    '/_authed/_app/products/': {
+      id: '/_authed/_app/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof AuthedAppProductsIndexRouteImport
+      parentRoute: typeof AuthedAppRoute
+    }
+    '/_authed/_app/sales/': {
+      id: '/_authed/_app/sales/'
+      path: '/sales'
+      fullPath: '/sales/'
+      preLoaderRoute: typeof AuthedAppSalesIndexRouteImport
+      parentRoute: typeof AuthedAppRoute
+    }
     '/_authed/_app/transactions/': {
       id: '/_authed/_app/transactions/'
       path: '/transactions'
@@ -281,18 +357,26 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedAppRouteChildren {
+  AuthedAppPosRoute: typeof AuthedAppPosRoute
   AuthedAppSettingsRoute: typeof AuthedAppSettingsRoute
   AuthedAppIndexRoute: typeof AuthedAppIndexRoute
   AuthedAppCustomersCustomerIdRoute: typeof AuthedAppCustomersCustomerIdRoute
   AuthedAppCustomersIndexRoute: typeof AuthedAppCustomersIndexRoute
+  AuthedAppExpensesIndexRoute: typeof AuthedAppExpensesIndexRoute
+  AuthedAppProductsIndexRoute: typeof AuthedAppProductsIndexRoute
+  AuthedAppSalesIndexRoute: typeof AuthedAppSalesIndexRoute
   AuthedAppTransactionsIndexRoute: typeof AuthedAppTransactionsIndexRoute
 }
 
 const AuthedAppRouteChildren: AuthedAppRouteChildren = {
+  AuthedAppPosRoute: AuthedAppPosRoute,
   AuthedAppSettingsRoute: AuthedAppSettingsRoute,
   AuthedAppIndexRoute: AuthedAppIndexRoute,
   AuthedAppCustomersCustomerIdRoute: AuthedAppCustomersCustomerIdRoute,
   AuthedAppCustomersIndexRoute: AuthedAppCustomersIndexRoute,
+  AuthedAppExpensesIndexRoute: AuthedAppExpensesIndexRoute,
+  AuthedAppProductsIndexRoute: AuthedAppProductsIndexRoute,
+  AuthedAppSalesIndexRoute: AuthedAppSalesIndexRoute,
   AuthedAppTransactionsIndexRoute: AuthedAppTransactionsIndexRoute,
 }
 

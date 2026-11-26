@@ -163,6 +163,17 @@ function SettingsPage() {
               />
             </div>
             <div className="sm:col-span-2">
+              <Label htmlFor="bank_details">Bank Details (for Invoices)</Label>
+              <Textarea
+                id="bank_details"
+                value={draft.bank_details || ""}
+                onChange={(e) => update({ bank_details: e.target.value })}
+                placeholder="Acc No. - Bank Name - Account Name"
+                rows={3}
+                className="mt-1.5"
+              />
+            </div>
+            <div className="sm:col-span-2">
               <Label htmlFor="receipt_note">Receipt footer</Label>
               <Textarea
                 id="receipt_note"

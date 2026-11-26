@@ -17,6 +17,7 @@ export async function saveProfile(values) {
     address: values.address || "",
     currency: values.currency || "NGN",
     receipt_note: values.receipt_note || "",
+    bank_details: values.bank_details || "", // 🔑 Ensure this is here
   };
   if (values.id) return base44.entities.BusinessProfile.update(values.id, payload);
   return base44.entities.BusinessProfile.create(payload);
@@ -67,8 +68,7 @@ export async function recalcCustomer(customerId) {
 export async function createTransaction({ customer, type, amount, note, date }) {
   const value = Math.abs(Number(amount) || 0);
   const current = Number(customer.balance) || 0;
-  const balanceAfter =
-    type === "credit" ? current + value : Math.max(0, current - value);
+  const balanceAfter = type === "credit" ? current + value : Math.max(0, current - value);
 
   const record = await base44.entities.Transaction.create({
     customer_id: customer.id,
