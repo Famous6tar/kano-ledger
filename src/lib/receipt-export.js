@@ -2,7 +2,6 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
 async function render(node) {
-  // 1. Clone the element and place it off-screen
   const clone = node.cloneNode(true);
   const wrapper = document.createElement("div");
   
@@ -10,33 +9,25 @@ async function render(node) {
   wrapper.style.left = "-9999px";
   wrapper.style.top = "0";
   
-  // Detect if this is an invoice (maxWidth: 800px) or receipt (maxWidth: 440px)
   const inlineMaxWidth = node.style.maxWidth;
   const isInvoice = inlineMaxWidth === "800px" || inlineMaxWidth === "800";
   const minWidth = isInvoice ? 800 : 440;
-  
-  // On mobile, node.scrollWidth is small (e.g. 350px). We force it to the desktop width.
   const targetWidth = Math.max(node.scrollWidth, minWidth);
   
   wrapper.style.width = `${targetWidth}px`;
   wrapper.style.backgroundColor = "#ffffff";
   
   clone.style.width = "100%";
-  clone.style.maxWidth = "none"; // Override inline maxWidth so it fills the wrapper
+  clone.style.maxWidth = "none";
   clone.style.margin = "0";
   
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
   try {
-    // Wait a brief moment for any images (like the logo) to load inside the clone
     await new Promise(resolve => setTimeout(resolve, 150));
-
-    // 2. Calculate safe scale to avoid mobile canvas limits
-    // Most mobile devices max out around 16,777,216 pixels total
     const baseScale = 2;
     const estimatedPixels = targetWidth * clone.scrollHeight * (baseScale * baseScale);
-    // If the receipt is too long, drop scale to 1 to prevent blank canvas on iOS
     const finalScale = estimatedPixels > 12000000 ? 1 : baseScale;
 
     const canvas = await html2canvas(clone, {
@@ -51,22 +42,19 @@ async function render(node) {
     });
     return canvas;
   } finally {
-    // 3. Clean up
     document.body.removeChild(wrapper);
   }
 }
 
-function download(url, filename) {
+export function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
   document.body.appendChild(link);
   link.click();
   link.remove();
-}
-
-function toBlob(canvas) {
-  return new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.98));
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 export async function toDataUrl(url) {
@@ -82,10 +70,12 @@ export async function toDataUrl(url) {
 
 export async function exportPng(node, filename) {
   const canvas = await render(node);
-  download(canvas.toDataURL("image/png"), filename);
+  canvas.toBlob((blob) => {
+    if (blob) downloadBlob(blob, filename);
+  }, "image/png", 0.98);
 }
 
-export async function exportPdf(node, filename) {
+export async function generatePdfBlob(node) {
   const canvas = await render(node);
   const image = canvas.toDataURL("image/png");
   const pdf = new jsPDF({
@@ -95,19 +85,24 @@ export async function exportPdf(node, filename) {
     compress: true,
   });
   pdf.addImage(image, "PNG", 0, 0, canvas.width, canvas.height);
-  pdf.save(filename);
+  return pdf.output("blob");
 }
 
-export async function sharePng(node, filename, text) {
-  const canvas = await render(node);
-  const blob = await toBlob(canvas);
-  const file = new File([blob], filename, { type: "image/png" });
+export async function exportPdf(node, filename) {
+  const blob = await generatePdfBlob(node);
+  downloadBlob(blob, filename);
+}
 
+export async function sharePdfBlob(blob, filename, text) {
+  const file = new File([blob], filename, { type: "application/pdf" });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    await navigator.share({ files: [file], title: filename, text });
-    return true;
+    try {
+      await navigator.share({ files: [file], title: filename, text });
+      return true;
+    } catch (err) {
+      console.warn("Share failed:", err);
+      return false;
+    }
   }
-
-  download(URL.createObjectURL(blob), filename);
   return false;
 }
