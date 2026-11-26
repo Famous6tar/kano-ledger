@@ -17,7 +17,7 @@ export async function saveProfile(values) {
     address: values.address || "",
     currency: values.currency || "NGN",
     receipt_note: values.receipt_note || "",
-    bank_details: values.bank_details || "", // 🔑 Ensure this is here
+    bank_details: values.bank_details || "",
   };
   if (values.id) return base44.entities.BusinessProfile.update(values.id, payload);
   return base44.entities.BusinessProfile.create(payload);
@@ -46,6 +46,20 @@ export async function createCustomer(values) {
     total_paid: 0,
     last_activity: new Date().toISOString(),
   });
+}
+
+// 🔑 New functions
+export async function updateCustomer(id, values) {
+  return base44.entities.Customer.update(id, {
+    name: values.name,
+    phone: values.phone || "",
+    address: values.address || "",
+    notes: values.notes || "",
+  });
+}
+
+export async function deleteCustomer(id) {
+  return base44.entities.Customer.delete(id);
 }
 
 export async function recalcCustomer(customerId) {
