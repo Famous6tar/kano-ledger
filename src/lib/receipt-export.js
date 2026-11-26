@@ -2,34 +2,56 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
 async function render(node) {
-  // 🔑 The Bulletproof Fix:
-  // Clone the receipt and append it to the <body> off-screen.
-  // This completely removes it from the modal's scrollbars, max-height, and clipping issues.
+  // 1. Clone the element and place it off-screen
   const clone = node.cloneNode(true);
   const wrapper = document.createElement("div");
   
   wrapper.style.position = "absolute";
-  wrapper.style.left = "-9999px"; // Off-screen
+  wrapper.style.left = "-9999px";
   wrapper.style.top = "0";
-  wrapper.style.width = `${node.offsetWidth}px`; // Match original width
+  
+  // Detect if this is an invoice (maxWidth: 800px) or receipt (maxWidth: 440px)
+  const inlineMaxWidth = node.style.maxWidth;
+  const isInvoice = inlineMaxWidth === "800px" || inlineMaxWidth === "800";
+  const minWidth = isInvoice ? 800 : 440;
+  
+  // On mobile, node.scrollWidth is small (e.g. 350px). We force it to the desktop width.
+  const targetWidth = Math.max(node.scrollWidth, minWidth);
+  
+  wrapper.style.width = `${targetWidth}px`;
   wrapper.style.backgroundColor = "#ffffff";
+  
+  clone.style.width = "100%";
+  clone.style.maxWidth = "none"; // Override inline maxWidth so it fills the wrapper
+  clone.style.margin = "0";
+  
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
   try {
+    // Wait a brief moment for any images (like the logo) to load inside the clone
+    await new Promise(resolve => setTimeout(resolve, 150));
+
+    // 2. Calculate safe scale to avoid mobile canvas limits
+    // Most mobile devices max out around 16,777,216 pixels total
+    const baseScale = 2;
+    const estimatedPixels = targetWidth * clone.scrollHeight * (baseScale * baseScale);
+    // If the receipt is too long, drop scale to 1 to prevent blank canvas on iOS
+    const finalScale = estimatedPixels > 12000000 ? 1 : baseScale;
+
     const canvas = await html2canvas(clone, {
-      scale: 2, // High resolution
+      scale: finalScale,
       backgroundColor: "#ffffff",
       useCORS: true,
       logging: false,
-      width: clone.scrollWidth,
+      width: targetWidth,
       height: clone.scrollHeight,
-      windowWidth: clone.scrollWidth,
+      windowWidth: targetWidth,
       windowHeight: clone.scrollHeight,
     });
     return canvas;
   } finally {
-    // Clean up the off-screen clone
+    // 3. Clean up
     document.body.removeChild(wrapper);
   }
 }
