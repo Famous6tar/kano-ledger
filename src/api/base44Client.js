@@ -109,6 +109,10 @@ export const base44 = {
     Customer: entity("Customer"),
     Transaction: entity("Transaction"),
     User: entity("User"),
+    Product: entity("Product"),
+    Sale: entity("Sale"),
+    Expense: entity("Expense"),
+    Supplier: entity("Supplier"),
   },
   integrations: {
     Core: {
@@ -118,9 +122,5 @@ export const base44 = {
         return request("/api/upload", { method: "POST", body: fd });
       },
     },
-  },
-  mcp: {
-    getConsentInfo() { throw new Error("MCP is not available locally."); },
-    respondToConsent() { throw new Error("MCP is not available locally."); },
   },
 };
