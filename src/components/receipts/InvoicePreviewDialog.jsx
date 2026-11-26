@@ -4,13 +4,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { InvoicePaper } from "@/components/receipts/InvoicePaper";
-import { exportPdf, exportPng, sharePng, toDataUrl } from "@/lib/receipt-export";
+import { exportPdf, exportPng, generatePdfBlob, sharePdfBlob, toDataUrl, downloadBlob } from "@/lib/receipt-export";
 import { formatMoney } from "@/lib/format";
 
 export function InvoicePreviewDialog({ open, onOpenChange, sale, customer, brand }) {
   const paperRef = useRef(null);
   const [logo, setLogo] = useState("");
   const [busy, setBusy] = useState("");
+  const [pdfBlob, setPdfBlob] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -21,6 +22,25 @@ export function InvoicePreviewDialog({ open, onOpenChange, sale, customer, brand
     toDataUrl(brand.logo_url).then((data) => alive && setLogo(data)).catch(() => alive && setLogo(""));
     return () => { alive = false; };
   }, [open, brand?.logo_url]);
+
+  // 🔑 Pre-generate the PDF in the background so "Share" is instant
+  useEffect(() => {
+    if (!open || !sale) {
+      setPdfBlob(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      if (paperRef.current) {
+        try {
+          const blob = await generatePdfBlob(paperRef.current);
+          setPdfBlob(blob);
+        } catch (err) {
+          console.error("Pre-generation failed", err);
+        }
+      }
+    }, 600); // wait for DOM to paint
+    return () => clearTimeout(timer);
+  }, [open, sale, logo]);
 
   const baseName = `receipt-${sale?.sale_number || "draft"}`;
 
@@ -37,11 +57,17 @@ export function InvoicePreviewDialog({ open, onOpenChange, sale, customer, brand
     }
   };
 
-  const share = () =>
-    run("share", async () => {
-      const shared = await sharePng(paperRef.current, `${baseName}.png`, `Receipt #${sale?.sale_number} for ${customer?.name || "Walk-in"} — Total ${formatMoney(sale?.total || 0)}`);
-      if (!shared) toast.success("Image downloaded — share it from your files");
-    });
+  const share = async () => {
+    if (!pdfBlob) {
+      toast.error("Preparing PDF... Please wait 2 seconds and try again.");
+      return;
+    }
+    const shared = await sharePdfBlob(pdfBlob, `${baseName}.pdf`, `Receipt #${sale?.sale_number} — ${formatMoney(sale?.total || 0)}`);
+    if (!shared) {
+      toast.error("Sharing not supported. Downloading instead.");
+      downloadBlob(pdfBlob, `${baseName}.pdf`);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,13 +84,13 @@ export function InvoicePreviewDialog({ open, onOpenChange, sale, customer, brand
 
         <div className="grid grid-cols-3 gap-2 mt-4">
           <Button variant="outline" className="rounded-full text-xs" disabled={!!busy} onClick={() => run("png", () => exportPng(paperRef.current, `${baseName}.png`), "Image saved")}>
-            <Download className="mr-1.5 h-3.5 w-3.5" /> {busy === "png" ? "…" : "Image"}
+            <Download className="mr-1.5 h-3.5 w-3.5" /> {busy === "png" ? "…" : "Picture"}
           </Button>
           <Button variant="outline" className="rounded-full text-xs" disabled={!!busy} onClick={() => run("pdf", () => exportPdf(paperRef.current, `${baseName}.pdf`), "PDF saved")}>
             <FileText className="mr-1.5 h-3.5 w-3.5" /> {busy === "pdf" ? "…" : "PDF"}
           </Button>
           <Button className="rounded-full bg-brand text-xs text-brand-foreground hover:bg-brand/90" disabled={!!busy} onClick={share}>
-            <Share2 className="mr-1.5 h-3.5 w-3.5" /> {busy === "share" ? "…" : "Share"}
+            <Share2 className="mr-1.5 h-3.5 w-3.5" /> {busy === "share" ? "…" : "Share PDF"}
           </Button>
         </div>
       </DialogContent>

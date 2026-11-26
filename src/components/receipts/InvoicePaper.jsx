@@ -100,7 +100,7 @@ export function InvoicePaper({ innerRef, brand, customer, sale, logo }) {
       </div>
 
       <div style={{ textAlign: "center", borderTop: `1px solid ${LINE}`, paddingTop: 20, fontSize: 10, color: MUTED, textTransform: "uppercase", letterSpacing: 1 }}>
-        Generated Using {brand?.business_name || "Kanti"} | Powered by Kanti
+        Generated Using {brand?.business_name || "Kanti"} | Powered by Famous6tar Infotech Ltd
       </div>
     </div>
   );

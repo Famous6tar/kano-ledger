@@ -232,7 +232,7 @@ export function ReceiptPaper({ innerRef, brand, transaction, customer, logo, his
         }}
       >
         <span>{brand?.address || brand?.business_name || ""}</span>
-        <span>Powered by Kanti</span>
+        <span>Powered by Famous6tar Infotech Ltd</span>
       </div>
     </div>
   );

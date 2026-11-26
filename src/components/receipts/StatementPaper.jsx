@@ -144,7 +144,7 @@ export function StatementPaper({ innerRef, brand, customer, transactions = [], l
         }}
       >
         <span>{brand?.address || ""}</span>
-        <span>Powered by Kanti</span>
+        <span>Powered by Famous6tar Infotech Ltd</span>
       </div>
     </div>
   );
