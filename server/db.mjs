@@ -3,7 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Replace your current DB_PATH and UPLOAD_DIR definitions with:
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === "production";
 const rootDir = isProduction ? "/var/data" : resolve(__dirname, "..", "data");
 
@@ -45,6 +45,7 @@ db.exec(`
     address TEXT DEFAULT '',
     currency TEXT DEFAULT 'NGN',
     receipt_note TEXT DEFAULT '',
+    bank_details TEXT DEFAULT '',
     created_date TEXT NOT NULL,
     updated_date TEXT NOT NULL,
     FOREIGN KEY (created_by_id) REFERENCES users(id) ON DELETE CASCADE
@@ -61,6 +62,20 @@ db.exec(`
     total_credit REAL NOT NULL DEFAULT 0,
     total_paid REAL NOT NULL DEFAULT 0,
     last_activity TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    FOREIGN KEY (created_by_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS products (
+    id TEXT PRIMARY KEY,
+    created_by_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    sku TEXT,
+    category TEXT DEFAULT 'General',
+    cost_price REAL DEFAULT 0,
+    price REAL NOT NULL DEFAULT 0,
+    stock_quantity REAL DEFAULT 0,
     created_date TEXT NOT NULL,
     updated_date TEXT NOT NULL,
     FOREIGN KEY (created_by_id) REFERENCES users(id) ON DELETE CASCADE
@@ -83,8 +98,58 @@ db.exec(`
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
   );
 
+  CREATE TABLE IF NOT EXISTS sales (
+    id TEXT PRIMARY KEY,
+    created_by_id TEXT NOT NULL,
+    customer_id TEXT,
+    sale_number TEXT UNIQUE NOT NULL,
+    type TEXT DEFAULT 'pos',
+    status TEXT DEFAULT 'PAID',
+    items_json TEXT NOT NULL,
+    sub_total REAL NOT NULL,
+    discount REAL DEFAULT 0,
+    tax REAL DEFAULT 0,
+    total REAL NOT NULL,
+    amount_paid REAL DEFAULT 0,
+    balance REAL NOT NULL DEFAULT 0,
+    payment_method TEXT DEFAULT 'Cash',
+    date TEXT NOT NULL,
+    due_date TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    FOREIGN KEY (created_by_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS expenses (
+    id TEXT PRIMARY KEY,
+    created_by_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    amount REAL NOT NULL,
+    category TEXT DEFAULT 'General',
+    date TEXT NOT NULL,
+    note TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    FOREIGN KEY (created_by_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS suppliers (
+    id TEXT PRIMARY KEY,
+    created_by_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    email TEXT,
+    address TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    FOREIGN KEY (created_by_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
   CREATE INDEX IF NOT EXISTS idx_customers_owner ON customers(created_by_id);
   CREATE INDEX IF NOT EXISTS idx_transactions_owner ON transactions(created_by_id);
   CREATE INDEX IF NOT EXISTS idx_transactions_customer ON transactions(customer_id);
-  CREATE INDEX IF NOT EXISTS idx_bp_owner ON business_profiles(created_by_id);
+  CREATE INDEX IF NOT EXISTS idx_products_owner ON products(created_by_id);
+  CREATE INDEX IF NOT EXISTS idx_sales_owner ON sales(created_by_id);
+  CREATE INDEX IF NOT EXISTS idx_expenses_owner ON expenses(created_by_id);
 `);

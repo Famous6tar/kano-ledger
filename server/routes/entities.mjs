@@ -8,7 +8,7 @@ router.use(requireAuth);
 const ENTITIES = {
   BusinessProfile: {
     table: "business_profiles",
-    fields: ["business_name","tagline","logo_url","brand_color","accent_color","phone","email","address","currency","receipt_note"],
+    fields: ["business_name","tagline","logo_url","brand_color","accent_color","phone","email","address","currency","receipt_note","bank_details"],
     required: ["business_name"],
     sortable: ["business_name","created_date","updated_date"],
   },
@@ -23,6 +23,30 @@ const ENTITIES = {
     fields: ["customer_id","customer_name","type","amount","note","balance_after","reference","date"],
     required: ["customer_id","type","amount"],
     sortable: ["date","amount","type","created_date"],
+  },
+  Product: {
+    table: "products",
+    fields: ["name", "sku", "category", "cost_price", "price", "stock_quantity"],
+    required: ["name", "price"],
+    sortable: ["name", "stock_quantity", "price", "created_date"],
+  },
+  Sale: {
+    table: "sales",
+    fields: ["customer_id", "sale_number", "type", "status", "items_json", "sub_total", "discount", "tax", "total", "amount_paid", "balance", "payment_method", "date", "due_date"],
+    required: ["sale_number", "items_json", "total"],
+    sortable: ["sale_number", "date", "total", "created_date"],
+  },
+  Expense: {
+    table: "expenses",
+    fields: ["title", "amount", "category", "date", "note"],
+    required: ["title", "amount", "date"],
+    sortable: ["date", "amount", "created_date"],
+  },
+  Supplier: {
+    table: "suppliers",
+    fields: ["name", "phone", "email", "address"],
+    required: ["name"],
+    sortable: ["name", "created_date"],
   },
   User: {
     table: "users",
